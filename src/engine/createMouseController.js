@@ -1,13 +1,13 @@
 const createMouseController = ({
   onDrag = () => {},
-  onMouseUp = () => {}
+  onMouseUp = () => {},
 }) => {
   let isDragging = false;
   let isClicked = false;
   let hasDragged = false;
   return {
     initialize() {
-      document.onmousemove = e => {
+      document.onmousemove = (e) => {
         if (isClicked) {
           if (!isDragging) this.setIsDragging(true); // console.log('onMove', e.movementX, e.movementY, isDragging);
 
@@ -24,16 +24,18 @@ const createMouseController = ({
       };
     },
 
-    setIsDragging: bool => {
+    setIsDragging: (bool) => {
       isDragging = bool;
     },
-    setHasDragged: bool => {
+    setHasDragged: (bool) => {
       hasDragged = bool;
     },
-    setIsClicked: bool => {
+    setIsClicked: (bool) => {
       isClicked = bool;
     },
     getHasDragged: () => hasDragged,
-    getIsDragging: () => isDragging
+    getIsDragging: () => isDragging,
   };
 };
+
+export default createMouseController;

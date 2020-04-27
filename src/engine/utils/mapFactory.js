@@ -1,3 +1,5 @@
+import uniqueID from 'lodash/uniqueId';
+
 const biomes = {
   0: 0,
   field: 0,
@@ -9,7 +11,7 @@ const biomes = {
   mountain: 138,
   iron: 37,
   hills: 216,
-  village: 119
+  village: 119,
 };
 
 const generateRandomLayer = () => {
@@ -25,7 +27,7 @@ const generateRandomLayer = () => {
   return 'field';
 };
 
-const generateVillage = type => {
+const generateVillage = (type) => {
   if (type === 'field') {
     const random = Math.random();
 
@@ -41,21 +43,33 @@ const createTile = (x, y) => {
   const biome = generateRandomLayer();
   const building = generateVillage(biome);
   return {
-    id: lodash_uniqueId__WEBPACK_IMPORTED_MODULE_0___default()(),
+    id: uniqueID(),
     x,
     y,
     biome,
-    layers: [1, biomes[biome], biomes[building]]
+    layers: [1, biomes[biome], biomes[building]],
   };
 };
 
-const generateRandomMap = size => Array(size).fill(null).map((_, x) => Array(size).fill(null).map((__, y) => createTile(x, y)));
+const generateRandomMap = (size) => Array(size).fill(null).map(
+  (_, x) => Array(size).fill(null).map((__, y) => createTile(x, y)),
+);
 
 const createChunk = (x, y, chunkSize) => ({
   x,
   y,
-  tiles: generateRandomMap(chunkSize)
+  tiles: generateRandomMap(chunkSize),
 });
 
-const createChunks = (size, chunkSize = 8, onCreate = () => null) => Array(size / chunkSize).fill(null).map((_, x) => Array(size / chunkSize).fill(null).map((__, y) => onCreate(x, y, chunkSize)));
+const createChunks = (size, chunkSize = 8, onCreate = () => null) => Array(size / chunkSize)
+  .fill(null)
+  .map((_, x) => Array(size / chunkSize)
+    .fill(null)
+    .map((__, y) => onCreate(x, y, chunkSize)));
+
 const generateChunks = (size, chunkSize = 8) => createChunks(size, chunkSize, createChunk);
+
+export {
+  generateChunks,
+  createChunks,
+};

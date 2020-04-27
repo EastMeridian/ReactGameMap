@@ -4,7 +4,7 @@ function Renderer({
   layers,
   map,
   camera,
-  onRequestChunks
+  onRequestChunks,
 }) {
   this.context = context;
   this.assets = assets;
@@ -19,13 +19,13 @@ Renderer.prototype.getTileSource = (tile, tilesetWidth, tileSize) => {
   const formatedTile = tile - 1;
   return {
     x: formatedTile % tilesetWidth * tileSize,
-    y: Math.floor(formatedTile / tilesetWidth) * tileSize
+    y: Math.floor(formatedTile / tilesetWidth) * tileSize,
   };
 };
 
 Renderer.prototype.getRenderedBoundaries = function getRenderedBoundaries() {
   const {
-    tileSize
+    tileSize,
   } = this.map;
   const startCol = Math.floor(this.camera.x / tileSize);
   const endCol = startCol + this.camera.width / tileSize;
@@ -39,7 +39,7 @@ Renderer.prototype.getRenderedBoundaries = function getRenderedBoundaries() {
     startRow,
     endRow,
     offsetX,
-    offsetY
+    offsetY,
   };
 };
 
@@ -48,11 +48,11 @@ Renderer.prototype.getEnlargedBoundaries = function getEnlargedBoundaries(offset
     startCol,
     endCol,
     startRow,
-    endRow
+    endRow,
   } = this.getRenderedBoundaries();
   const {
     width,
-    height
+    height,
   } = this.map;
   const minCol = startCol - offset < 0 ? 0 : startCol - offset;
   const maxCol = endCol + offset > width - offset ? width - offset : endCol + offset;
@@ -62,7 +62,7 @@ Renderer.prototype.getEnlargedBoundaries = function getEnlargedBoundaries(offset
     minCol,
     maxCol,
     minRow,
-    maxRow
+    maxRow,
   };
 };
 
@@ -71,14 +71,14 @@ Renderer.prototype.renderTile = function renderTile(tile, boundaries, layer, ima
     startCol,
     startRow,
     offsetX,
-    offsetY
+    offsetY,
   } = boundaries;
   const {
     index,
-    tilesetWidth
+    tilesetWidth,
   } = layer;
   const {
-    tileSize
+    tileSize,
   } = this.map;
   const tileLayer = tile.layers[index];
 
@@ -88,17 +88,17 @@ Renderer.prototype.renderTile = function renderTile(tile, boundaries, layer, ima
     const y = (r - startRow) * tileSize + offsetY;
     const {
       x: sX,
-      y: sY
+      y: sY,
     } = this.getTileSource(tileLayer, tilesetWidth, tileSize);
     this.context.drawImage(image, // image
-    sX, // source x
-    sY, // source y
-    tileSize, // source width
-    tileSize, // source height
-    Math.round(x), // target x
-    Math.round(y), // target y
-    tileSize, // target width
-    tileSize // target height
+      sX, // source x
+      sY, // source y
+      tileSize, // source width
+      tileSize, // source height
+      Math.round(x), // target x
+      Math.round(y), // target y
+      tileSize, // target width
+      tileSize, // target height
     );
 
     if (this.selectedTile && this.selectedTile === tile.id) {
@@ -110,7 +110,7 @@ Renderer.prototype.renderTile = function renderTile(tile, boundaries, layer, ima
 
 Renderer.prototype.renderLayer = function renderLayer(layer) {
   const {
-    asset
+    asset,
   } = layer;
   const {
     startCol,
@@ -131,7 +131,7 @@ Renderer.prototype.renderLayer = function renderLayer(layer) {
           endCol,
           startRow,
           endRow,
-          ...other
+          ...other,
         };
         this.renderTile(tile, boundaries, layer, image, c, r);
       }
@@ -141,21 +141,21 @@ Renderer.prototype.renderLayer = function renderLayer(layer) {
 
 Renderer.prototype.getChunkPosition = (x, y, chunkSize) => ({
   x: Math.floor(x / chunkSize),
-  y: Math.floor(y / chunkSize)
+  y: Math.floor(y / chunkSize),
 });
 
 Renderer.prototype.getTilePosition = (x, y, chunkSize) => ({
   x: x % chunkSize,
-  y: y % chunkSize
+  y: y % chunkSize,
 });
 
 Renderer.prototype.getChunk = function getChunk(x, y, {
   chunks,
-  chunkSize
+  chunkSize,
 }) {
   const {
     x: chunkX,
-    y: chunkY
+    y: chunkY,
   } = this.getChunkPosition(x, y, chunkSize);
   if (!chunks[chunkX]) return undefined;
   return chunks[chunkX][chunkY];
@@ -163,15 +163,15 @@ Renderer.prototype.getChunk = function getChunk(x, y, {
 
 Renderer.prototype.getTile = function getTile(x, y, {
   chunks,
-  chunkSize
+  chunkSize,
 }) {
   const {
     x: tileX,
-    y: tileY
+    y: tileY,
   } = this.getTilePosition(x, y, chunkSize);
   const chunk = this.getChunk(x, y, {
     chunks,
-    chunkSize
+    chunkSize,
   });
   if (!chunk) return null;
   const tile = chunk.tiles[tileX][tileY];
@@ -185,13 +185,13 @@ Renderer.prototype.renderMap = function renderMap() {
 
 Renderer.prototype.findTileByPosition = function findTileByPosition(x, y) {
   const {
-    tileSize
+    tileSize,
   } = this.map;
   const {
     startCol,
     startRow,
     offsetX,
-    offsetY
+    offsetY,
   } = this.getRenderedBoundaries();
   const clickX = Math.floor((x - offsetX) / tileSize);
   const clickY = Math.floor((y - offsetY) / tileSize);
@@ -199,7 +199,7 @@ Renderer.prototype.findTileByPosition = function findTileByPosition(x, y) {
   const tileY = startRow + clickY;
   return {
     x: tileX,
-    y: tileY
+    y: tileY,
   };
 };
 
@@ -216,18 +216,18 @@ Renderer.prototype.resetSelectTile = function selectTile() {
   this.renderMap();
 };
 
-Renderer.prototype.sameChunk = chunkA => chunkB => chunkA.x === chunkB.x && chunkA.y === chunkB.y;
+Renderer.prototype.sameChunk = (chunkA) => (chunkB) => chunkA.x === chunkB.x && chunkA.y === chunkB.y;
 
 Renderer.prototype.requestChunks = async function requestChunks() {
   const {
     minCol,
     maxCol,
     minRow,
-    maxRow
+    maxRow,
   } = this.getEnlargedBoundaries(8);
   const {
     chunks,
-    chunkSize
+    chunkSize,
   } = this.map;
   const wantedChunksPosition = [];
 
@@ -235,7 +235,7 @@ Renderer.prototype.requestChunks = async function requestChunks() {
     for (let r = minRow - 1; r <= maxRow + 1; r += 1) {
       if (this.getChunk(c, r, {
         chunks,
-        chunkSize
+        chunkSize,
       }) === null) {
         const chunkPosition = this.getChunkPosition(c, r, chunkSize);
 
@@ -246,8 +246,10 @@ Renderer.prototype.requestChunks = async function requestChunks() {
     }
   }
 
-  wantedChunksPosition.forEach(chunkPosition => this.onRequestChunks(chunkPosition).then(chunk => {
+  wantedChunksPosition.forEach((chunkPosition) => this.onRequestChunks(chunkPosition).then((chunk) => {
     chunks[chunk.x][chunk.y] = chunk;
     requestAnimationFrame(this.renderMap.bind(this));
   }));
 };
+
+export default Renderer;

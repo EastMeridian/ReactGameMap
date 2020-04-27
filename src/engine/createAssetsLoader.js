@@ -17,6 +17,8 @@ const createAssetsLoader = () => {
 
       image.src = src;
     }),
-    getAsset: key => assets[key]
+    getAsset: (key) => assets[key],
   };
 };
+
+export default createAssetsLoader;

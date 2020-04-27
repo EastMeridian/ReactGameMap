@@ -1,10 +1,12 @@
 const createTestMapLoader = ({
-  chunks
+  chunks,
 }) => ({
   getChunk: ({
     x,
-    y
-  }) => new Promise(resolve => {
+    y,
+  }) => new Promise((resolve) => {
     setTimeout(() => resolve(chunks[x][y]), 300);
-  })
+  }),
 });
+
+export default createTestMapLoader;

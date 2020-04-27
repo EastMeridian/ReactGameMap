@@ -31,5 +31,7 @@ Camera.prototype.center = function center(x, y) {
 const createCamera = ({
   map,
   width,
-  height
+  height,
 }) => new Camera(map, width, height);
+
+export default createCamera;
