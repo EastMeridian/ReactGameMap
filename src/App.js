@@ -7,7 +7,6 @@ import {
   generateChunks,
 } from './engine';
 
-
 const containerStyle = {
   height: '100vh',
   width: '100vw',
@@ -36,6 +35,7 @@ function App() {
             renderer.requestChunks();
           }}
           onRequestChunks={testMapLoader.getChunk}
+          onDataDisplay={(data) => console.log(data)}
         />
       </View>
     </View>

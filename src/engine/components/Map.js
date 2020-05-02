@@ -5,7 +5,10 @@ import createMapRenderer from '../renderer';
 import createMouseController from '../createMouseController';
 
 const canvasStyle = {
-  backgroundColor: 'black',
+  backgroundColor: '#120136',
+  userSelect: 'none',
+  WebKitUserSelect: 'none',
+  MozUserSelect: 'none',
 };
 
 function getMousePosition(canvas, evt) {
@@ -44,7 +47,7 @@ let mouseController = null;
 const GameMap = ({
   scale = 1,
   assets,
-  onDataDisplay,
+  onDataDisplay = () => {},
   onInitialize = () => {},
   size = 720,
   onRequestChunks,
@@ -80,7 +83,6 @@ const GameMap = ({
       onInitialize(mapRenderer);
     });
   }, [assets, onInitialize, onRequestChunks, scale, size]);
-  console.log('gamemap');
 
   return (
     <canvas

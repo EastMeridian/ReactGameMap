@@ -18,7 +18,7 @@ function Renderer({
 Renderer.prototype.getTileSource = (tile, tilesetWidth, tileSize) => {
   const formatedTile = tile - 1;
   return {
-    x: formatedTile % tilesetWidth * tileSize,
+    x: formatedTile % (tilesetWidth * tileSize),
     y: Math.floor(formatedTile / tilesetWidth) * tileSize,
   };
 };
@@ -90,7 +90,8 @@ Renderer.prototype.renderTile = function renderTile(tile, boundaries, layer, ima
       x: sX,
       y: sY,
     } = this.getTileSource(tileLayer, tilesetWidth, tileSize);
-    this.context.drawImage(image, // image
+    this.context.drawImage(
+      image, // image
       sX, // source x
       sY, // source y
       tileSize, // source width
@@ -216,7 +217,9 @@ Renderer.prototype.resetSelectTile = function selectTile() {
   this.renderMap();
 };
 
-Renderer.prototype.sameChunk = (chunkA) => (chunkB) => chunkA.x === chunkB.x && chunkA.y === chunkB.y;
+Renderer.prototype.sameChunk = (chunkA) => (chunkB) => (
+  chunkA.x === chunkB.x && chunkA.y === chunkB.y
+);
 
 Renderer.prototype.requestChunks = async function requestChunks() {
   const {
@@ -233,12 +236,8 @@ Renderer.prototype.requestChunks = async function requestChunks() {
 
   for (let c = minCol - 1; c <= maxCol + 1; c += 1) {
     for (let r = minRow - 1; r <= maxRow + 1; r += 1) {
-      if (this.getChunk(c, r, {
-        chunks,
-        chunkSize,
-      }) === null) {
+      if (this.getChunk(c, r, { chunks, chunkSize }) === null) {
         const chunkPosition = this.getChunkPosition(c, r, chunkSize);
-
         if (wantedChunksPosition.findIndex(this.sameChunk(chunkPosition)) === -1) {
           wantedChunksPosition.push(chunkPosition);
         }
@@ -246,10 +245,11 @@ Renderer.prototype.requestChunks = async function requestChunks() {
     }
   }
 
-  wantedChunksPosition.forEach((chunkPosition) => this.onRequestChunks(chunkPosition).then((chunk) => {
-    chunks[chunk.x][chunk.y] = chunk;
-    requestAnimationFrame(this.renderMap.bind(this));
-  }));
+  wantedChunksPosition.forEach((chunkPosition) => (
+    this.onRequestChunks(chunkPosition).then((chunk) => {
+      chunks[chunk.x][chunk.y] = chunk;
+      requestAnimationFrame(this.renderMap.bind(this));
+    })));
 };
 
 export default Renderer;
