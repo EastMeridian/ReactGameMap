@@ -28,7 +28,10 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 var canvasStyle = {
-  backgroundColor: '#120136'
+  backgroundColor: '#120136',
+  userSelect: 'none',
+  WebKitUserSelect: 'none',
+  MozUserSelect: 'none'
 };
 
 function getMousePosition(canvas, evt) {
@@ -87,12 +90,15 @@ var GameMap = function GameMap(_ref2) {
   var _ref2$scale = _ref2.scale,
       scale = _ref2$scale === void 0 ? 1 : _ref2$scale,
       assets = _ref2.assets,
-      onDataDisplay = _ref2.onDataDisplay,
+      _ref2$onDataDisplay = _ref2.onDataDisplay,
+      onDataDisplay = _ref2$onDataDisplay === void 0 ? function () {} : _ref2$onDataDisplay,
       _ref2$onInitialize = _ref2.onInitialize,
       onInitialize = _ref2$onInitialize === void 0 ? function () {} : _ref2$onInitialize,
       _ref2$size = _ref2.size,
       size = _ref2$size === void 0 ? 720 : _ref2$size,
-      onRequestChunks = _ref2.onRequestChunks;
+      onRequestChunks = _ref2.onRequestChunks,
+      _ref2$onOver = _ref2.onOver,
+      onOver = _ref2$onOver === void 0 ? function () {} : _ref2$onOver;
   var canvasRef = (0, _react.useRef)(null);
   (0, _react.useEffect)(function () {
     var current = canvasRef.current;
@@ -116,6 +122,11 @@ var GameMap = function GameMap(_ref2) {
           if (!isDragging) {
             mapRenderer.resetSelectTile();
           }
+        },
+        onMouseStop: function onMouseStop(e) {
+          var mousePosition = getMousePosition(canvasRef.current, e);
+          var tile = mapRenderer.findTile(mousePosition.x, mousePosition.y);
+          onOver(tile);
         }
       });
       mouseController.initialize();
@@ -138,6 +149,12 @@ var GameMap = function GameMap(_ref2) {
         var mousePosition = getMousePosition(canvasRef.current, e);
         var tile = mapRenderer.selectTile(mousePosition.x, mousePosition.y);
         onDataDisplay(tile);
+      }
+    },
+    onMouseMove: function onMouseMove(e) {
+      if (mouseController) {
+        e.persist();
+        mouseController.onMouseMove(e);
       }
     }
   });

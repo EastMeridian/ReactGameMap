@@ -1,22 +1,25 @@
 const createMouseController = ({
-  onDrag = () => {},
-  onMouseUp = () => {},
+  onDrag = () => { },
+  onMouseUp = () => { },
+  onMouseStop = () => { },
+  overTime = 400,
 }) => {
   let isDragging = false;
   let isClicked = false;
   let hasDragged = false;
+  const hasMoved = false;
+  let timer = null;
   return {
     initialize() {
       document.onmousemove = (e) => {
         if (isClicked) {
-          if (!isDragging) this.setIsDragging(true); // console.log('onMove', e.movementX, e.movementY, isDragging);
+          if (!isDragging) this.setIsDragging(true);
 
           onDrag(e);
         }
       };
 
       document.onmouseup = () => {
-        // console.log('onmouseup', isDragging);
         onMouseUp();
         this.setHasDragged(isDragging);
         this.setIsClicked(false);
@@ -35,6 +38,12 @@ const createMouseController = ({
     },
     getHasDragged: () => hasDragged,
     getIsDragging: () => isDragging,
+    onMouseMove: (e) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        onMouseStop(e);
+      }, overTime);
+    },
   };
 };
 

@@ -51,6 +51,7 @@ const GameMap = ({
   onInitialize = () => {},
   size = 720,
   onRequestChunks,
+  onOver = () => {},
 }) => {
   const canvasRef = useRef(null);
   useEffect(() => {
@@ -78,6 +79,11 @@ const GameMap = ({
             mapRenderer.resetSelectTile();
           }
         },
+        onMouseStop: (e) => {
+          const mousePosition = getMousePosition(canvasRef.current, e);
+          const tile = mapRenderer.findTile(mousePosition.x, mousePosition.y);
+          onOver(tile);
+        },
       });
       mouseController.initialize();
       onInitialize(mapRenderer);
@@ -101,6 +107,12 @@ const GameMap = ({
           const mousePosition = getMousePosition(canvasRef.current, e);
           const tile = mapRenderer.selectTile(mousePosition.x, mousePosition.y);
           onDataDisplay(tile);
+        }
+      }}
+      onMouseMove={(e) => {
+        if (mouseController) {
+          e.persist();
+          mouseController.onMouseMove(e);
         }
       }}
     />

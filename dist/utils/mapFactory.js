@@ -69,11 +69,17 @@ var generateRandomMap = function generateRandomMap(size) {
 };
 
 var createChunk = function createChunk(x, y, chunkSize) {
+  var tiles = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
   return {
     x: x,
     y: y,
-    tiles: generateRandomMap(chunkSize)
+    tiles: tiles,
+    chunkSize: chunkSize
   };
+};
+
+var createRandomChunk = function createRandomChunk(x, y, chunkSize) {
+  return createChunk(x, y, chunkSize, generateRandomMap(chunkSize));
 };
 
 var createChunks = function createChunks(size) {
@@ -92,7 +98,7 @@ exports.createChunks = createChunks;
 
 var generateChunks = function generateChunks(size) {
   var chunkSize = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 8;
-  return createChunks(size, chunkSize, createChunk);
+  return createChunks(size, chunkSize, createRandomChunk);
 };
 
 exports.generateChunks = generateChunks;

@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _createChunkLoadingTracer = _interopRequireDefault(require("./createChunkLoadingTracer"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
@@ -33,6 +37,7 @@ function Renderer(_ref) {
   this.camera = camera;
   this.selectedTile = null;
   this.onRequestChunks = onRequestChunks;
+  this.chunkLoadingTracer = (0, _createChunkLoadingTracer.default)();
 }
 
 Renderer.prototype.getTileSource = function (tile, tilesetWidth, tileSize) {
@@ -219,9 +224,14 @@ Renderer.prototype.findTileByPosition = function findTileByPosition(x, y) {
   };
 };
 
-Renderer.prototype.selectTile = function selectTile(x, y) {
+Renderer.prototype.findTile = function findTile(x, y) {
   var position = this.findTileByPosition(x, y);
   var tile = this.getTile(position.x, position.y, this.map);
+  return tile;
+};
+
+Renderer.prototype.selectTile = function selectTile(x, y) {
+  var tile = this.findTile(x, y);
   this.selectedTile = tile.id;
   this.renderMap();
   return tile;
@@ -260,7 +270,8 @@ Renderer.prototype.requestChunks = /*#__PURE__*/function () {
                 }) === null) {
                   chunkPosition = this.getChunkPosition(c, r, chunkSize);
 
-                  if (wantedChunksPosition.findIndex(this.sameChunk(chunkPosition)) === -1) {
+                  if (wantedChunksPosition.findIndex(this.sameChunk(chunkPosition)) === -1 && !this.chunkLoadingTracer.isLoading(chunkPosition)) {
+                    this.chunkLoadingTracer.subscribe(chunkPosition);
                     wantedChunksPosition.push(chunkPosition);
                   }
                 }
@@ -269,6 +280,8 @@ Renderer.prototype.requestChunks = /*#__PURE__*/function () {
 
             wantedChunksPosition.forEach(function (chunkPosition) {
               return _this.onRequestChunks(chunkPosition).then(function (chunk) {
+                _this.chunkLoadingTracer.unsubscribe(chunkPosition);
+
                 chunks[chunk.x][chunk.y] = chunk;
                 requestAnimationFrame(_this.renderMap.bind(_this));
               });

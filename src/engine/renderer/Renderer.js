@@ -1,3 +1,5 @@
+import createChunkLoadingTracer from './createChunkLoadingTracer';
+
 function Renderer({
   context,
   assets,
@@ -13,12 +15,13 @@ function Renderer({
   this.camera = camera;
   this.selectedTile = null;
   this.onRequestChunks = onRequestChunks;
+  this.chunkLoadingTracer = createChunkLoadingTracer();
 }
 
 Renderer.prototype.getTileSource = (tile, tilesetWidth, tileSize) => {
   const formatedTile = tile - 1;
   return {
-    x: formatedTile % (tilesetWidth * tileSize),
+    x: formatedTile % tilesetWidth * tileSize,
     y: Math.floor(formatedTile / tilesetWidth) * tileSize,
   };
 };
@@ -204,9 +207,14 @@ Renderer.prototype.findTileByPosition = function findTileByPosition(x, y) {
   };
 };
 
-Renderer.prototype.selectTile = function selectTile(x, y) {
+Renderer.prototype.findTile = function findTile(x, y) {
   const position = this.findTileByPosition(x, y);
   const tile = this.getTile(position.x, position.y, this.map);
+  return tile;
+};
+
+Renderer.prototype.selectTile = function selectTile(x, y) {
+  const tile = this.findTile(x, y);
   this.selectedTile = tile.id;
   this.renderMap();
   return tile;
@@ -238,18 +246,23 @@ Renderer.prototype.requestChunks = async function requestChunks() {
     for (let r = minRow - 1; r <= maxRow + 1; r += 1) {
       if (this.getChunk(c, r, { chunks, chunkSize }) === null) {
         const chunkPosition = this.getChunkPosition(c, r, chunkSize);
-        if (wantedChunksPosition.findIndex(this.sameChunk(chunkPosition)) === -1) {
+
+        if (wantedChunksPosition.findIndex(this.sameChunk(chunkPosition)) === -1
+        && !this.chunkLoadingTracer.isLoading(chunkPosition)) {
+          this.chunkLoadingTracer.subscribe(chunkPosition);
           wantedChunksPosition.push(chunkPosition);
         }
       }
     }
   }
 
-  wantedChunksPosition.forEach((chunkPosition) => (
-    this.onRequestChunks(chunkPosition).then((chunk) => {
+  wantedChunksPosition.forEach((chunkPosition) => this.onRequestChunks(chunkPosition).then(
+    (chunk) => {
+      this.chunkLoadingTracer.unsubscribe(chunkPosition);
       chunks[chunk.x][chunk.y] = chunk;
       requestAnimationFrame(this.renderMap.bind(this));
-    })));
+    },
+  ));
 };
 
 export default Renderer;

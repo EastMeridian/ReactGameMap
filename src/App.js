@@ -36,6 +36,7 @@ function App() {
           }}
           onRequestChunks={testMapLoader.getChunk}
           onDataDisplay={(data) => console.log(data)}
+/*           onOver={(data) => console.log('onOver', data)} */
         />
       </View>
     </View>
