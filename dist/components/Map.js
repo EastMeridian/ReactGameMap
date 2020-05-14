@@ -13,7 +13,7 @@ var _propTypes = _interopRequireDefault(require("prop-types"));
 
 var _createAssetsLoader = _interopRequireDefault(require("../createAssetsLoader"));
 
-var _renderer = _interopRequireDefault(require("../renderer"));
+var _system = require("../system");
 
 var _createMouseController = _interopRequireDefault(require("../createMouseController"));
 
@@ -33,31 +33,6 @@ var canvasStyle = {
   WebKitUserSelect: 'none',
   MozUserSelect: 'none'
 };
-
-function getMousePosition(canvas, evt) {
-  var rect = canvas.getBoundingClientRect();
-  return {
-    x: evt.clientX - rect.left,
-    y: evt.clientY - rect.top
-  };
-}
-
-var initializeContext = function initializeContext(current, scale) {
-  var canvas = current; // Get the device pixel ratio, falling back to 1.
-
-  /*   const dpr = window.devicePixelRatio || 1;
-  // Get the size of the canvas in CSS pixels.
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  const heightRatio = 1;
-  canvas.height = canvas.width * heightRatio; */
-
-  var context = canvas.getContext('2d'); // context.scale(dpr, dpr);
-
-  return context;
-};
-
 var assetsLoader = (0, _createAssetsLoader.default)();
 
 var loadAllAssetsAsync = /*#__PURE__*/function () {
@@ -67,7 +42,7 @@ var loadAllAssetsAsync = /*#__PURE__*/function () {
         switch (_context.prev = _context.next) {
           case 0:
             return _context.abrupt("return", Promise.all(assets.map(function (asset) {
-              return assetsLoader.loadImageAsync(asset.key, asset.src);
+              return assetsLoader.loadImageAsync(asset);
             })));
 
           case 1:
@@ -83,59 +58,80 @@ var loadAllAssetsAsync = /*#__PURE__*/function () {
   };
 }();
 
-var mapRenderer = null;
+var engine = null;
 var mouseController = null;
 
-var GameMap = function GameMap(_ref2) {
-  var _ref2$scale = _ref2.scale,
-      scale = _ref2$scale === void 0 ? 1 : _ref2$scale,
-      assets = _ref2.assets,
-      _ref2$onDataDisplay = _ref2.onDataDisplay,
-      onDataDisplay = _ref2$onDataDisplay === void 0 ? function () {} : _ref2$onDataDisplay,
-      _ref2$onInitialize = _ref2.onInitialize,
-      onInitialize = _ref2$onInitialize === void 0 ? function () {} : _ref2$onInitialize,
-      _ref2$size = _ref2.size,
-      size = _ref2$size === void 0 ? 720 : _ref2$size,
+var initialize = function initialize(_ref2) {
+  var width = _ref2.width,
+      height = _ref2.height,
       onRequestChunks = _ref2.onRequestChunks,
-      _ref2$onOver = _ref2.onOver,
-      onOver = _ref2$onOver === void 0 ? function () {} : _ref2$onOver;
+      onOver = _ref2.onOver,
+      canvas = _ref2.canvas;
+  var context = canvas.getContext('2d');
+  console.log('CONTEXT');
+  engine = (0, _system.createEngine)({
+    assets: assetsLoader.getAssets(),
+    context: context,
+    width: width,
+    height: height,
+    onRequestChunks: onRequestChunks
+  });
+  mouseController = (0, _createMouseController.default)({
+    canvas: canvas,
+    onDrag: function onDrag(e) {
+      engine.camera.move(0.0048, -e.movementX, -e.movementY);
+      engine.update();
+    },
+    onMouseUp: function onMouseUp() {
+      var isDragging = mouseController.getIsDragging();
+
+      if (!isDragging) {
+        engine.resetSelectTile();
+      }
+    },
+    onMouseStop: function onMouseStop(mousePosition) {
+      var tile = engine.findTile(mousePosition.x, mousePosition.y);
+      onOver({
+        tile: tile,
+        mousePosition: mousePosition
+      });
+    }
+  });
+  mouseController.initialize();
+};
+
+var GameMap = function GameMap(_ref3) {
+  var _ref3$scale = _ref3.scale,
+      scale = _ref3$scale === void 0 ? 1 : _ref3$scale,
+      assets = _ref3.assets,
+      _ref3$onClick = _ref3.onClick,
+      _onClick = _ref3$onClick === void 0 ? function () {} : _ref3$onClick,
+      _ref3$onInitialize = _ref3.onInitialize,
+      onInitialize = _ref3$onInitialize === void 0 ? function () {} : _ref3$onInitialize,
+      width = _ref3.width,
+      height = _ref3.height,
+      onRequestChunks = _ref3.onRequestChunks,
+      _ref3$onOver = _ref3.onOver,
+      onOver = _ref3$onOver === void 0 ? function () {} : _ref3$onOver;
+
   var canvasRef = (0, _react.useRef)(null);
   (0, _react.useEffect)(function () {
-    var current = canvasRef.current;
-    var context = initializeContext(current, scale);
+    var canvas = canvasRef.current;
     loadAllAssetsAsync(assets).then(function () {
-      mapRenderer = (0, _renderer.default)({
-        assets: assetsLoader,
-        context: context,
-        size: size,
-        onRequestChunks: onRequestChunks
+      initialize({
+        width: width,
+        height: height,
+        onRequestChunks: onRequestChunks,
+        onOver: onOver,
+        canvas: canvas
       });
-      mouseController = (0, _createMouseController.default)({
-        onDrag: function onDrag(e) {
-          mapRenderer.camera.move(0.005, -e.movementX, -e.movementY);
-          mapRenderer.requestChunks();
-          mapRenderer.renderMap();
-        },
-        onMouseUp: function onMouseUp() {
-          var isDragging = mouseController.getIsDragging();
-
-          if (!isDragging) {
-            mapRenderer.resetSelectTile();
-          }
-        },
-        onMouseStop: function onMouseStop(e) {
-          var mousePosition = getMousePosition(canvasRef.current, e);
-          var tile = mapRenderer.findTile(mousePosition.x, mousePosition.y);
-          onOver(tile);
-        }
-      });
-      mouseController.initialize();
-      onInitialize(mapRenderer);
+      onInitialize(engine);
+      console.log(engine);
     });
-  }, [assets, onInitialize, onRequestChunks, scale, size]);
+  }, []);
   return /*#__PURE__*/_react.default.createElement("canvas", {
-    width: size,
-    height: size,
+    width: width,
+    height: height,
     ref: canvasRef,
     id: "canvas-id",
     style: canvasStyle,
@@ -146,9 +142,10 @@ var GameMap = function GameMap(_ref2) {
       var hasDragged = mouseController.getHasDragged();
 
       if (!hasDragged) {
-        var mousePosition = getMousePosition(canvasRef.current, e);
-        var tile = mapRenderer.selectTile(mousePosition.x, mousePosition.y);
-        onDataDisplay(tile);
+        var mousePosition = mouseController.getMousePosition(e);
+        var tile = engine.selectTile(mousePosition.x, mousePosition.y);
+
+        _onClick(tile);
       }
     },
     onMouseMove: function onMouseMove(e) {
@@ -160,5 +157,29 @@ var GameMap = function GameMap(_ref2) {
   });
 };
 
-var _default = GameMap;
+GameMap.propTypes = {
+  scale: _propTypes.default.number,
+  width: _propTypes.default.number,
+  height: _propTypes.default.number,
+  assets: _propTypes.default.arrayOf(_propTypes.default.shape({})),
+  onClick: _propTypes.default.func,
+  onInitialize: _propTypes.default.func,
+  onRequestChunks: _propTypes.default.func,
+  onOver: _propTypes.default.func
+};
+GameMap.defaultProps = {
+  scale: 1,
+  width: 720,
+  height: 720,
+  assets: [],
+  onClick: function onClick() {},
+  onInitialize: function onInitialize() {},
+  onRequestChunks: function onRequestChunks() {},
+  onOver: function onOver() {}
+};
+
+var _default = (0, _react.memo)(GameMap, function () {
+  return false;
+});
+
 exports.default = _default;

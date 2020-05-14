@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 
 var createMouseController = function createMouseController(_ref) {
-  var _ref$onDrag = _ref.onDrag,
+  var canvas = _ref.canvas,
+      _ref$onDrag = _ref.onDrag,
       onDrag = _ref$onDrag === void 0 ? function () {} : _ref$onDrag,
       _ref$onMouseUp = _ref.onMouseUp,
       onMouseUp = _ref$onMouseUp === void 0 ? function () {} : _ref$onMouseUp,
@@ -17,7 +18,6 @@ var createMouseController = function createMouseController(_ref) {
   var isDragging = false;
   var isClicked = false;
   var hasDragged = false;
-  var hasMoved = false;
   var timer = null;
   return {
     initialize: function initialize() {
@@ -56,10 +56,19 @@ var createMouseController = function createMouseController(_ref) {
       return isDragging;
     },
     onMouseMove: function onMouseMove(e) {
+      var _this2 = this;
+
       clearTimeout(timer);
       timer = setTimeout(function () {
-        onMouseStop(e);
+        onMouseStop(_this2.getMousePosition(e));
       }, overTime);
+    },
+    getMousePosition: function getMousePosition(evt) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
     }
   };
 };

@@ -1,20 +1,20 @@
 const createMouseController = ({
+  canvas,
   onDrag = () => { },
   onMouseUp = () => { },
   onMouseStop = () => { },
   overTime = 400,
+  scale,
 }) => {
   let isDragging = false;
   let isClicked = false;
   let hasDragged = false;
-  const hasMoved = false;
   let timer = null;
   return {
     initialize() {
       document.onmousemove = (e) => {
         if (isClicked) {
           if (!isDragging) this.setIsDragging(true);
-
           onDrag(e);
         }
       };
@@ -38,11 +38,19 @@ const createMouseController = ({
     },
     getHasDragged: () => hasDragged,
     getIsDragging: () => isDragging,
-    onMouseMove: (e) => {
+    onMouseMove(e) {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        onMouseStop(e);
+        onMouseStop(this.getMousePosition(e));
       }, overTime);
+    },
+
+    getMousePosition: (evt) => {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (evt.clientX - rect.left) / scale,
+        y: (evt.clientY - rect.top) / scale,
+      };
     },
   };
 };

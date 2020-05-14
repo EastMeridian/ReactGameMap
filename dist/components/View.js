@@ -26,7 +26,7 @@ var View = function View(_ref) {
   var children = _ref.children,
       style = _ref.style;
   return /*#__PURE__*/_react.default.createElement("div", {
-    style: _objectSpread({}, containerStyle, {}, style)
+    style: _objectSpread(_objectSpread({}, containerStyle), style)
   }, children);
 };
 

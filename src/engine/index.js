@@ -6,15 +6,22 @@ import {
   generateChunks,
 } from './utils/mapFactory';
 
-import tileset1 from './assets/Beautiful_World_A5b.png';
-import tileset2 from './assets/Beautiful_World4.png';
+import floor from './assets/Beautiful_World_A5b.png';
+import items from './assets/Beautiful_World4.png';
+import icons from './assets/botw.jpg';
 
 const assets = [{
-  key: 'tileset1',
-  src: tileset1,
+  key: 'floor',
+  src: floor,
+  tilesetWidth: 8,
 }, {
-  key: 'tileset2',
-  src: tileset2,
+  key: 'items',
+  src: items,
+  tilesetWidth: 16,
+}, {
+  key: 'icons',
+  src: icons,
+  tilesetWidth: 96,
 }];
 
 export {

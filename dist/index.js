@@ -47,13 +47,21 @@ var _Beautiful_World_A5b = _interopRequireDefault(require("./assets/Beautiful_Wo
 
 var _Beautiful_World = _interopRequireDefault(require("./assets/Beautiful_World4.png"));
 
+var _botw = _interopRequireDefault(require("./assets/botw.jpg"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var assets = [{
-  key: 'tileset1',
-  src: _Beautiful_World_A5b.default
+  key: 'floor',
+  src: _Beautiful_World_A5b.default,
+  tilesetWidth: 8
 }, {
-  key: 'tileset2',
-  src: _Beautiful_World.default
+  key: 'items',
+  src: _Beautiful_World.default,
+  tilesetWidth: 16
+}, {
+  key: 'icons',
+  src: _botw.default,
+  tilesetWidth: 96
 }];
 exports.assets = assets;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Map,
@@ -15,8 +15,15 @@ const containerStyle = {
 };
 const layoutStyle = {
   boxShadow: '0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)',
-  width: '720px',
-  height: '720px',
+  position: 'relative',
+};
+
+const overCardStyle = {
+  backgroundColor: '#00000050',
+  borderRadius: 2,
+  position: 'absolute',
+  pointerEvents: 'none',
+  width: 128,
 };
 
 const testMapLoader = createTestLoader({
@@ -24,21 +31,32 @@ const testMapLoader = createTestLoader({
 });
 
 function App() {
+  const [over, setOver] = useState(null);
+
   return (
     <View style={containerStyle}>
       <View style={layoutStyle}>
         <Map
+          width={1152}
+          height={720}
           assets={assets}
           onInitialize={(renderer) => {
-            renderer.camera.center(50, 50);
-            renderer.renderMap();
-            renderer.requestChunks();
+            renderer.camera.center(0, 0);
+            renderer.update();
           }}
           onRequestChunks={testMapLoader.getChunk}
-          onDataDisplay={(data) => console.log(data)}
-/*           onOver={(data) => console.log('onOver', data)} */
+          onClick={(data) => console.log(data)}
+          onOver={(data) => {
+            // setOver(data);
+            console.log('onOver', data);
+          }}
         />
       </View>
+      {over && (
+        <View style={{ ...overCardStyle, left: over.mousePosition.x, top: over.mousePosition.y }}>
+          {JSON.stringify(over)}
+        </View>
+      )}
     </View>
   );
 }
